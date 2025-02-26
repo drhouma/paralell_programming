@@ -8,7 +8,7 @@
 using namespace std;
 
 /* Функция, которую будет исполнять созданный поток */
-void *thread_job(void *arg) { cout << n << " thread is running..." << endl; }
+void *thread_job(void *arg) { cout << "Thread is running..." << endl; }
 
 int main() {
   // Определяем переменные: идентификатор потока и код ошибки
