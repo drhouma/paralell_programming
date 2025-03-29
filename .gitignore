@@ -1,2 +1,5 @@
 *.out
 2018_ariykov.pdf
+*.zip
+.vscode
+.DS_Store

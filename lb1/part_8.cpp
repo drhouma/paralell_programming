@@ -96,7 +96,6 @@ int main() {
     vector<int> *indicies = new vector<int>;
     for (int j = 0; j + i < array_size; j = j + threads_count) {
       indicies->push_back(i + j);
-      // cout << i + j << ' ';
     }
     pthread_t thread;
     params *param = new params;
