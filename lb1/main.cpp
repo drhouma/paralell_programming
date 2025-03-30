@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <limits.h>
 
 #define CLOCKS_PER_MSEC 1000
 

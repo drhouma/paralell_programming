@@ -13,6 +13,10 @@
 #include <iostream>
 #include <sstream>
 
+#define Kb_512 1024 * 512
+#define Mb_1 1024 * 1024
+#define Mb_2 1024 * 1024 * 2
+
 char response[] =
     "HTTP/1.1 200 OK\r\n"
     "Content-Type: text/html; charset=UTF-8\r\n\r\n"
@@ -36,15 +40,49 @@ std::string construct_ans(int client_fd) {
     return s.str();
 }
 
+void *process_conn_php(void *arg) {
+    int client_fd = *(int *)arg;
+    free(arg);  // Освобождаем память, выделенную для дескриптора
+
+    // Буфер для чтения запроса
+    char buffer[1024];
+    read(client_fd, buffer, sizeof(buffer) - 1);
+    buffer[sizeof(buffer) - 1] = '\0'; // Обеспечиваем нуль-терминатор
+    FILE *fp;
+    char result[1024];
+    fp = popen("php -v", "r");
+    if (fp == NULL) {
+        perror("Failed to run command");
+        close(client_fd);
+        return NULL;
+    }
+
+    // Читаем результат выполнения скрипта
+    std::string php_output;
+    while (fgets(result, sizeof(result), fp) != NULL) {
+        php_output += result;
+    }
+    pclose(fp);
+    // Формируем HTTP-ответ
+    std::string response_php = "HTTP/1.1 200 OK\r\n"
+                              "Content-Type: text/plain; charset=UTF-8\r\n\r\n" +
+                              php_output;
+    std::cout << response_php << std::endl;
+    // Отправляем ответ клиенту
+    write(client_fd, response_php.c_str(), response_php.size());
+    close(client_fd);  // Закрываем соединение
+    return NULL;       // Завершаем поток
+}
+
 void *process_conn(void *arg) {
     int client_fd = *(int *)arg;
     int req_n = ((int *)arg)[1];
     free(arg);  // Освобождаем память, выделенную для дескриптора
 
     // Отправляем ответ клиенту
-    // char response2[400];
-    // strcpy(response2, construct_ans(req_n).c_str());
-    write(client_fd, response, sizeof(response) - 1); /* -1: '\0' */
+    
+    std::string resp_string = construct_ans(req_n);
+    write(client_fd, resp_string.c_str(), resp_string.size()); /* -1: '\0' */
     close(client_fd);                                 // Закрываем соединение
     return NULL;                                      // Завершаем поток
 }
@@ -76,6 +114,11 @@ int main() {
     if (err != 0) {
         std::cout << "set_attr_ds err: " << err << std::endl;
     }
+    // err = pthread_attr_setstacksize(&attr, Mb_2);
+    if (err != 0) {
+        std::cout << "set_attr_ds err: " << err << std::endl;
+    }
+
 
     listen(sock, 5);
     int req_n = 1;
