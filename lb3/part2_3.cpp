@@ -32,7 +32,7 @@ void Ex19Program() {
     // Директива OpenMP для распараллеливания цикла
 #pragma omp parallel for
     for (int i = 0; i < 100; i++) {
-        a[i] = b[i];
+        a[i] = OneSecondFunction(b[i]);
         b[i] = 2 * a[i];
     }
 
@@ -53,7 +53,7 @@ void Ex19ProgramNoOMP() {
         b[i] = i;
 
     for (int i = 0; i < 100; i++) {
-        a[i] = b[i];
+        a[i] = OneSecondFunction(b[i]);
         b[i] = 2 * a[i];
     }
 
@@ -65,18 +65,25 @@ void Ex19ProgramNoOMP() {
 
 int main() {
     // TestOneSecondFunc();
-    Ex19ProgramNoOMP();
     while (true) {
         cout << "User interface:\n";
         cout << "1. Ex19 with omp\n";
         cout << "2. Ex19 without omp\n";
-        cout << "0. exit";
+        cout << "0. exit\n";
         string input;
         cin >> input;
         if (input == "1") {
+            auto start = clock();
             Ex19Program();
+            auto end = clock();
+            auto time = end - start;
+            cout << "One sec func time: " << time / (double)CLOCKS_PER_SEC << endl;
         } else if (input == "2") {
+            auto start = clock();
             Ex19ProgramNoOMP();
+            auto end = clock();
+            auto time = end - start;
+            cout << "One sec func time: " << time / (double)CLOCKS_PER_SEC << endl;
         } else if (input == "0") {
             exit(0);
         }
