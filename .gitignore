@@ -4,3 +4,5 @@
 *.zip
 .vscode
 .DS_Store
+*.o
+*.a
